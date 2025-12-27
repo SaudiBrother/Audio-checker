@@ -1,40 +1,457 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PWA Audio App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TrueAudio Detector - Analyze audio quality and detect fake upscaled bitrates using advanced Spectral Analysis.">
+    <meta name="keywords" content="audio analyzer, spectral analysis, bitrate detector, audio quality, web audio api">
+    <meta property="og:title" content="TrueAudio Detector | Professional Audio Quality Analyzer">
+    <meta property="og:description" content="Advanced browser-based tool for detecting upscaled audio and analyzing spectral characteristics.">
+    <meta name="theme-color" content="#6366f1">
+    
+    <title>TrueAudio Detector | Professional Audio Quality & Spectral Analyzer</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" as="style">
+    <link rel="preload" href="css/style.css" as="style">
+    
+    <!-- Fonts with fallback -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    
+    <!-- CSS with fallback -->
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+    
     <link rel="stylesheet" href="css/style.css">
-    <meta name="theme-color" content="#2c3e50">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
 </head>
 <body>
-    <div id="app-container">
-        <header>
-            <h1>Audio Studio</h1>
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
+    <div class="app-container">
+        <header role="banner">
+            <nav class="navbar" role="navigation" aria-label="Main navigation">
+                <div class="logo">
+                    <div class="logo-icon" aria-hidden="true">
+                        <i class="fa-solid fa-wave-square"></i>
+                    </div>
+                    <h1>
+                        <span class="visually-hidden">TrueAudio</span>
+                        TrueAudio <span class="accent-text">Detector</span>
+                    </h1>
+                </div>
+                
+                <div class="header-controls">
+                    <button id="theme-toggle" class="icon-btn" aria-label="Toggle theme" title="Toggle between light and dark mode">
+                        <i class="fa-solid fa-sun" id="theme-icon"></i>
+                        <span class="visually-hidden">Toggle theme</span>
+                    </button>
+                    
+                    <button id="settings-btn" class="icon-btn" aria-label="Settings" title="Open settings">
+                        <i class="fa-solid fa-sliders"></i>
+                    </button>
+                    
+                    <a href="https://github.com/SaudiBrother/Adding-Audio-Effects" target="_blank" rel="noopener noreferrer" class="github-link" aria-label="View on GitHub">
+                        <i class="fa-brands fa-github"></i> <span>GitHub</span>
+                    </a>
+                </div>
+            </nav>
         </header>
-        
-        <main>
-            <div class="control-panel">
-                <button id="btn-action" class="primary-btn">Mulai Rekaman</button>
-                <div id="status-indicator">Siap</div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal" role="dialog" aria-labelledby="settings-title" hidden>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="settings-title"><i class="fa-solid fa-sliders"></i> Settings</h2>
+                    <button class="close-modal" aria-label="Close settings">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="setting-group">
+                        <label for="concurrent-processing">
+                            <i class="fa-solid fa-microchip"></i> Concurrent Processing
+                        </label>
+                        <select id="concurrent-processing">
+                            <option value="1">1 file at a time</option>
+                            <option value="2" selected>2 files at a time</option>
+                            <option value="3">3 files at a time</option>
+                            <option value="4">4 files at a time</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="fft-size">
+                            <i class="fa-solid fa-chart-line"></i> FFT Resolution
+                        </label>
+                        <select id="fft-size">
+                            <option value="2048">2048 (Faster)</option>
+                            <option value="4096" selected>4096 (Balanced)</option>
+                            <option value="8192">8192 (High Detail)</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="color-scheme">
+                            <i class="fa-solid fa-palette"></i> Spectrogram Colors
+                        </label>
+                        <select id="color-scheme">
+                            <option value="rainbow">Rainbow</option>
+                            <option value="heat" selected>Heat Map</option>
+                            <option value="ocean">Ocean</option>
+                            <option value="greyscale">Greyscale</option>
+                        </select>
+                    </div>
+                </div>
             </div>
-            
-            <div class="visualizer-container">
-                <canvas id="visualizer"></canvas>
+        </div>
+
+        <main id="main-content" role="main">
+            <section class="hero">
+                <div class="hero-content">
+                    <h2><i class="fa-solid fa-magnifying-glass-chart"></i> Advanced Audio Spectral Analysis</h2>
+                    <p class="subtitle">Detect upscaled audio, analyze spectral characteristics, and validate true audio quality with precision algorithms.</p>
+                </div>
+            </section>
+
+            <section class="upload-container" aria-labelledby="upload-heading">
+                <div class="upload-section" id="drop-zone" tabindex="0" role="region" aria-label="Audio file upload area">
+                    <input type="file" id="audio-input" accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg" multiple hidden>
+                    <div class="upload-content">
+                        <div class="upload-icon-wrapper" aria-hidden="true">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <h3 id="upload-heading">Drop Audio Files Here</h3>
+                        <p>Supported formats: MP3, FLAC, WAV, M4A, AAC, OGG, OPUS</p>
+                        <div class="upload-buttons">
+                            <button class="btn-primary" onclick="document.getElementById('audio-input').click()">
+                                <i class="fa-solid fa-folder-open"></i> Browse Files
+                            </button>
+                            <button id="record-btn" class="btn-secondary">
+                                <i class="fa-solid fa-microphone"></i> Record Audio
+                            </button>
+                        </div>
+                        <p class="upload-hint"><i class="fa-solid fa-lightbulb"></i> Tip: Drop multiple files for batch analysis</p>
+                    </div>
+                </div>
+
+                <!-- Batch controls -->
+                <div class="batch-controls" id="batch-controls" style="display: none;">
+                    <div class="batch-info">
+                        <span id="batch-count">0 files selected</span>
+                        <button id="select-all" class="btn-text">Select All</button>
+                    </div>
+                    <div class="batch-actions">
+                        <button id="pause-resume" class="btn-secondary">
+                            <i class="fa-solid fa-pause"></i> Pause
+                        </button>
+                        <button id="cancel-all" class="btn-text">
+                            <i class="fa-solid fa-ban"></i> Cancel All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Global loader with enhanced UI -->
+                <div id="global-loader" class="global-loader hidden" role="status" aria-live="polite">
+                    <div class="loader-header">
+                        <div class="spinner" aria-hidden="true"></div>
+                        <div class="loader-info">
+                            <span id="loader-text">Processing audio files...</span>
+                            <div class="loader-stats">
+                                <span id="loader-count">0/0</span>
+                                <span id="loader-speed">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="global-progress-fill" class="progress-fill" role="progressbar" 
+                             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                    </div>
+                    <div class="loader-details">
+                        <span id="current-file">-</span>
+                        <span id="time-remaining">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="results-header" id="results-header" style="display: none;" aria-labelledby="results-title">
+                <div class="section-title">
+                    <i class="fa-solid fa-list-check"></i>
+                    <h3 id="results-title">Analysis Results <span id="results-count" class="results-count">(0)</span></h3>
+                </div>
+                <div class="results-actions">
+                    <button id="export-btn" class="btn-secondary" title="Export results as CSV">
+                        <i class="fa-solid fa-download"></i> Export CSV
+                    </button>
+                    <button id="clear-all-btn" class="btn-text" title="Clear all results">
+                        <i class="fa-solid fa-trash-can"></i> Clear All
+                    </button>
+                    <button id="sort-btn" class="btn-text" title="Sort results">
+                        <i class="fa-solid fa-arrow-down-a-z"></i> Sort
+                    </button>
+                </div>
+            </section>
+
+            <div id="results-grid" class="results-grid" role="list" aria-label="Analysis results"></div>
+
+            <!-- Empty state -->
+            <div id="empty-state" class="empty-state">
+                <i class="fa-solid fa-wave-square"></i>
+                <h3>No audio files analyzed yet</h3>
+                <p>Upload audio files to begin spectral analysis</p>
             </div>
+
+            <!-- Comparison mode -->
+            <section class="comparison-mode" id="comparison-mode" style="display: none;">
+                <div class="comparison-header">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                    <h3>Comparison Mode <span class="badge">2 files selected</span></h3>
+                    <button id="exit-comparison" class="btn-text">
+                        <i class="fa-solid fa-xmark"></i> Exit
+                    </button>
+                </div>
+                <div class="comparison-charts">
+                    <canvas id="comparison-chart" width="800" height="300"></canvas>
+                </div>
+            </section>
+
+            <section class="quality-reference" aria-labelledby="reference-heading">
+                <div class="reference-header">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <h3 id="reference-heading">Quality Reference Scale</h3>
+                </div>
+                <div class="reference-grid">
+                    <div class="ref-item" style="--item-color: var(--color-bad);">
+                        <span class="badge"><i class="fa-solid fa-triangle-exclamation"></i> Fake / Upscaled</span>
+                        <p>Low frequency cutoff (&lt; 14kHz), artificial extension</p>
+                        <small>Common in transcoded audio</small>
+                    </div>
+                    <div class="ref-item" style="--item-color: var(--color-moderate);">
+                        <span class="badge"><i class="fa-solid fa-check"></i> Moderate</span>
+                        <p>Mid-range spectrum (~16kHz)</p>
+                        <small>Standard streaming quality</small>
+                    </div>
+                    <div class="ref-item" style="--item-color: var(--color-good);">
+                        <span class="badge"><i class="fa-solid fa-star"></i> High Quality</span>
+                        <p>Real 320kbps (~19kHz), clean spectrum</p>
+                        <small>Premium streaming / downloads</small>
+                    </div>
+                    <div class="ref-item" style="--item-color: var(--color-excellent);">
+                        <span class="badge"><i class="fa-solid fa-gem"></i> Lossless</span>
+                        <p>Full spectrum (> 20kHz), no cutoff</p>
+                        <small>FLAC, WAV, studio masters</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistics panel -->
+            <section class="statistics-panel" id="statistics-panel" style="display: none;">
+                <div class="stats-header">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <h3>Batch Statistics</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--color-excellent);">
+                            <i class="fa-solid fa-arrow-trend-up"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Highest Quality</span>
+                            <span class="stat-value" id="stat-best">-</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--color-bad);">
+                            <i class="fa-solid fa-arrow-trend-down"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Lowest Quality</span>
+                            <span class="stat-value" id="stat-worst">-</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--color-good);">
+                            <i class="fa-solid fa-average"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Average Quality</span>
+                            <span class="stat-value" id="stat-average">-</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--primary-color);">
+                            <i class="fa-solid fa-file-waveform"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Files Analyzed</span>
+                            <span class="stat-value" id="stat-total">0</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
+
+        <footer class="app-footer" role="contentinfo">
+            <div class="footer-content">
+                <p>&copy; 2024 TrueAudio Detector • Advanced Spectral Analysis Engine</p>
+                <p class="footer-links">
+                    <span><i class="fa-solid fa-microchip"></i> Web Audio API</span>
+                    •
+                    <span><i class="fa-solid fa-code"></i> Vanilla JavaScript</span>
+                    •
+                    <span><i class="fa-solid fa-gauge-high"></i> Real-time Processing</span>
+                </p>
+            </div>
+        </footer>
     </div>
 
-    <script type="module" src="assets/js/main.js"></script>
+    <!-- Notification toast -->
+    <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-content">
+            <i class="toast-icon"></i>
+            <span class="toast-message"></span>
+        </div>
+        <button class="toast-close" aria-label="Close notification">&times;</button>
+    </div>
 
+    <!-- Result card template -->
+    <template id="result-card-template">
+        <article class="result-card entering" role="listitem" tabindex="0">
+            <div class="card-header">
+                <div class="file-icon-wrapper" aria-hidden="true">
+                    <i class="fa-solid fa-music"></i>
+                </div>
+                <div class="file-info-head">
+                    <h3 class="filename" title="">filename.mp3</h3>
+                    <div class="tags-row">
+                        <span class="tag format-tag">MP3</span>
+                        <span class="tag quality-tag">Analyzing...</span>
+                        <span class="tag bitrate-tag">- kbps</span>
+                    </div>
+                </div>
+                <div class="card-controls">
+                    <button class="card-btn compare-btn" title="Add to comparison" aria-label="Add to comparison">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                    </button>
+                    <button class="card-btn expand-btn" title="Expand view" aria-label="Expand details">
+                        <i class="fa-solid fa-expand"></i>
+                    </button>
+                    <button class="card-btn remove-btn" title="Remove" aria-label="Remove file">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="visualizer-container">
+                    <canvas class="mini-spectrogram" width="300" height="80" 
+                            aria-label="Frequency spectrum visualization"></canvas>
+                    <div class="spectrogram-overlay">
+                        <div class="cutoff-indicator"></div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="stat-label"><i class="fa-solid fa-weight-hanging"></i> Size</span>
+                        <span class="stat-value size">-</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label"><i class="fa-solid fa-clock"></i> Duration</span>
+                        <span class="stat-value duration">-</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label"><i class="fa-solid fa-wave-square"></i> Sample Rate</span>
+                        <span class="stat-value sample-rate">-</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label"><i class="fa-solid fa-bolt"></i> Bitrate</span>
+                        <span class="stat-value bitrate">-</span>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="spectral-info">
+                    <div class="spec-row">
+                        <span class="spec-label"><i class="fa-solid fa-cut"></i> Cutoff Frequency</span>
+                        <span class="spec-value cutoff-freq">Pending</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label"><i class="fa-solid fa-percent"></i> Spectrum Usage</span>
+                        <span class="spec-value norm-cutoff">-</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label"><i class="fa-solid fa-chart-area"></i> HF Energy Ratio</span>
+                        <span class="spec-value hf-energy">-</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label"><i class="fa-solid fa-wave-square"></i> Dynamic Range</span>
+                        <span class="spec-value dynamic-range">- dB</span>
+                    </div>
+                </div>
+
+                <div class="quality-visual">
+                    <div class="quality-labels">
+                        <span>Poor</span>
+                        <span>Excellent</span>
+                    </div>
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 0%"></div>
+                        <div class="quality-markers">
+                            <span style="left: 30%">Moderate</span>
+                            <span style="left: 60%">Good</span>
+                            <span style="left: 85%">Great</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="confidence-meter">
+                        <span>Confidence:</span>
+                        <div class="confidence-bars">
+                            <div class="confidence-bar high"></div>
+                            <div class="confidence-bar medium"></div>
+                            <div class="confidence-bar low"></div>
+                        </div>
+                    </div>
+                    <span class="analysis-time">Analyzed in <span class="time-value">-</span>s</span>
+                </div>
+            </div>
+
+            <!-- Expanded view (hidden by default) -->
+            <div class="card-expanded" hidden>
+                <div class="expanded-header">
+                    <h4>Detailed Analysis</h4>
+                    <button class="close-expanded" aria-label="Close expanded view">
+                        <i class="fa-solid fa-compress"></i>
+                    </button>
+                </div>
+                <div class="expanded-content">
+                    <div class="full-spectrogram">
+                        <canvas class="full-spectrogram-canvas" width="600" height="200"></canvas>
+                    </div>
+                    <div class="detailed-stats">
+                        <!-- More detailed stats will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </article>
+    </template>
+
+    <!-- Scripts -->
+    <script src="js/script.js" defer></script>
     <script>
+        // Inline script for critical initializations
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW Aktif di scope:', reg.scope))
-                    .catch(err => console.log('SW Gagal:', err));
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
             });
         }
     </script>
 </body>
-</html>
+    </html>
