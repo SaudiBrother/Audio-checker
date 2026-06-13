@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <title>Offline — Soundnalyze</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #08080f;
+            --surface: #0f0f1e;
+            --text: #f0f2ff;
+            --muted: #6064a0;
+            --good: #10b981;
+            --bad: #ef4444;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 2rem;
+            text-align: center;
+        }
+        .card {
+            background: var(--surface);
+            border-radius: 28px;
+            padding: 3rem 2.5rem;
+            max-width: 460px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.07);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: .75rem;
+            margin-bottom: 1.75rem;
+        }
+        .logo-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 14px;
+            display: grid; place-items: center;
+            font-size: 1.35rem; color: #fff;
+        }
+        .logo h1 {
+            font-size: 1.5rem; font-weight: 700;
+            background: linear-gradient(to right, #f0f2ff, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .emoji { font-size: 3.5rem; margin-bottom: 1.25rem; display: block; }
+        h2 {
+            font-size: 1.6rem; font-weight: 700; margin-bottom: .5rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .sub { color: var(--muted); margin-bottom: 2rem; line-height: 1.7; font-size: .95rem; }
+        .features {
+            background: rgba(99,102,241,0.08);
+            border: 1px solid rgba(99,102,241,0.15);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+        .features h3 {
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .7px;
+            color: var(--primary);
+            margin-bottom: .75rem;
+            font-weight: 600;
+        }
+        .features li {
+            list-style: none;
+            padding: .3rem 0;
+            color: var(--muted);
+            font-size: .9rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+        }
+        .features li::before { content: '✓'; color: var(--primary); font-weight: 700; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .875rem 2rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform .15s, box-shadow .15s;
+            font-family: inherit;
+            box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(99,102,241,.5); }
+        .status-row {
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            font-size: .82rem;
+            color: var(--muted);
+        }
+        #status-dot {
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            background: var(--bad);
+            animation: dotPulse 1.8s ease-in-out infinite;
+        }
+        @keyframes dotPulse {
+            0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(239,68,68,.5); }
+            50%      { opacity:.5; box-shadow:0 0 0 5px rgba(239,68,68,0); }
+        }
+        #status-dot.online { background: var(--good); animation: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">
+            <div class="logo-icon">🎵</div>
+            <h1>Soundnalyze</h1>
+        </div>
+
+        <span class="emoji">📡</span>
+        <h2>Sedang Offline</h2>
+        <p class="sub">
+            Tidak ada koneksi internet. Tapi tenang —
+            <strong>Soundnalyze tetap berjalan offline</strong>
+            untuk semua file audio lokal di perangkatmu.
+        </p>
+
+        <div class="features">
+            <h3>Fitur tersedia offline</h3>
+            <ul>
+                <li>Analisis spektral FFT penuh (engine di-cache)</li>
+                <li>Upload &amp; analisis file audio lokal</li>
+                <li>Semua visualisasi &amp; quality scoring</li>
+                <li>Export hasil ke CSV / JSON</li>
+                <li>Batch processing &amp; comparison mode</li>
+            </ul>
+        </div>
+
+        <a href="." class="btn">↩ Kembali ke Soundnalyze</a>
+
+        <div class="status-row">
+            <span id="status-dot"></span>
+            <span id="status-text">Menunggu koneksi…</span>
+        </div>
+    </div>
+
+    <script>
+        function checkOnline() {
+            const dot  = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+            if (navigator.onLine) {
+                dot.classList.add('online');
+                text.textContent = 'Koneksi pulih — mengalihkan…';
+            } else {
+                dot.classList.remove('online');
+                text.textContent = 'Menunggu koneksi…';
+            }
+        }
+        window.addEventListener('online', () => {
+            checkOnline();
+            setTimeout(() => location.href = '.', 1000);
+        });
+        setInterval(checkOnline, 3000);
+        checkOnline();
+    </script>
+</body>
+</html>

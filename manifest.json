@@ -1,0 +1,51 @@
+{
+  "name": "Soundnalyze",
+  "short_name": "Soundnalyze",
+  "description": "Analisis kualitas audio dan deteksi fake upscaled bitrate menggunakan FFT engine — seluruhnya di browser kamu.",
+  "id": "soundnalyze-v3",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "theme_color": "#6366f1",
+  "background_color": "#0a0a0f",
+  "orientation": "any",
+  "lang": "id",
+  "dir": "ltr",
+  "categories": ["utilities", "music", "productivity"],
+
+  "icons": [
+    { "src": "assets/icon-72.png",           "sizes": "72x72",   "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-96.png",           "sizes": "96x96",   "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-128.png",          "sizes": "128x128", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-144.png",          "sizes": "144x144", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-152.png",          "sizes": "152x152", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-192.png",          "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-384.png",          "sizes": "384x384", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png",          "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/icon.svg",              "sizes": "any",     "type": "image/svg+xml", "purpose": "any" }
+  ],
+
+  "shortcuts": [
+    {
+      "name": "Analisis File Audio",
+      "short_name": "Buka",
+      "description": "Buka file audio untuk analisis spektral",
+      "url": "./?action=open",
+      "icons": [{ "src": "assets/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
+
+  "screenshots": [
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "label": "Soundnalyze — Audio Spectral Analyzer"
+    }
+  ],
+
+  "prefer_related_applications": false
+}
