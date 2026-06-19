@@ -1122,6 +1122,10 @@ class TrueAudioDetector {
         card.querySelector('.expand-btn').onclick  = () => this.toggleExpand(card);
         card.querySelector('.compare-btn').onclick = () => this.toggleComparison(card);
 
+        // FIX: "Perkecil" button inside the expanded panel had no listener at all.
+        const closeBtn = card.querySelector('.close-expanded');
+        if (closeBtn) closeBtn.onclick = () => this.toggleExpand(card);
+
         const grid = this.$('results-grid');
         grid.prepend(card);
         this.$('empty-state').style.display = 'none';
@@ -1278,12 +1282,15 @@ class TrueAudioDetector {
     toggleComparison(card) {
         const id = card.dataset.fileId;
         if (!id) return;
+        const btn = card.querySelector('.compare-btn');
         if (this.comparisonFiles.has(id)) {
             this.comparisonFiles.delete(id);
             card.classList.remove('in-comparison');
+            btn?.classList.remove('active');
         } else {
             this.comparisonFiles.add(id);
             card.classList.add('in-comparison');
+            btn?.classList.add('active');
         }
         this.updateComparison();
     }
@@ -1291,12 +1298,18 @@ class TrueAudioDetector {
     selectAllForComparison() {
         const allSel = this.comparisonFiles.size >= this.results.size;
         this.comparisonFiles.clear();
-        document.querySelectorAll('.result-card').forEach(c => c.classList.remove('in-comparison'));
+        document.querySelectorAll('.result-card').forEach(c => {
+            c.classList.remove('in-comparison');
+            c.querySelector('.compare-btn')?.classList.remove('active');
+        });
 
         if (!allSel) {
             this.results.forEach((_, id) => this.comparisonFiles.add(id));
             document.querySelectorAll('.result-card[data-file-id]').forEach(c => {
-                if (this.results.has(c.dataset.fileId)) c.classList.add('in-comparison');
+                if (this.results.has(c.dataset.fileId)) {
+                    c.classList.add('in-comparison');
+                    c.querySelector('.compare-btn')?.classList.add('active');
+                }
             });
         }
         this.updateComparison();
@@ -1428,11 +1441,24 @@ class TrueAudioDetector {
         if (!sec) return;
         const n     = this.comparisonFiles.size;
         const badge = sec.querySelector('.badge');
-        if (badge) badge.textContent = `${n} file${n !== 1 ? 's' : ''} selected`;
+        if (badge) badge.textContent = `${n} file dipilih`;
 
-        if (n >= 2) {
+        const chartEl = this.$('comparison-chart');
+        const hintEl  = sec.querySelector('.comparison-hint');
+
+        if (n >= 1) {
+            // FIX: panel used to stay hidden until 2 files were chosen, so a
+            // single click on "Tambah ke Perbandingan" looked like it did
+            // nothing. Now it opens immediately and explains what's needed.
             sec.style.display = 'block';
-            this.drawComparisonChart();
+            if (n >= 2) {
+                if (chartEl) chartEl.style.display = '';
+                if (hintEl)  hintEl.style.display  = 'none';
+                this.drawComparisonChart();
+            } else {
+                if (chartEl) chartEl.style.display = 'none';
+                if (hintEl)  hintEl.style.display  = 'block';
+            }
         } else {
             sec.style.display = 'none';
         }

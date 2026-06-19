@@ -688,6 +688,22 @@ body {
 .card-btn:hover { background: var(--primary); color: #fff; transform: scale(1.08); }
 .remove-btn:hover { background: var(--color-bad) !important; }
 
+/* FIX: compare-btn had no active-state styling, so toggling it gave
+   no visible feedback when only one card existed. */
+.compare-btn.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--primary-glow);
+}
+
+.comparison-hint {
+    color: var(--text-secondary);
+    font-size: .85rem;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    margin: 0;
+}
+
 /* Upscaled badge */
 .upscaled-badge {
     background: rgba(239,68,68,0.12);
@@ -701,6 +717,11 @@ body {
     align-items: center;
     gap: .5rem;
 }
+/* FIX: author-origin `display:flex` above always wins over the
+   user-agent default `[hidden]{display:none}`, so the badge was
+   showing even when JS correctly left it hidden. This rule restores
+   the expected hidden behaviour. */
+.upscaled-badge[hidden] { display: none; }
 
 /* ── 13. VISUALIZER ───────────────────────────────────────────── */
 .visualizer-container {
