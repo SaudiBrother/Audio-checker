@@ -76,6 +76,11 @@
 /* ── 2. RESET ─────────────────────────────────────────────────── */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
+/* Remove the semi-transparent blue tap-highlight box on touch devices */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
 html {
     font-size: 16px;
     scroll-behavior: smooth;
